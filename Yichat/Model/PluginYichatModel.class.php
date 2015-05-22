@@ -13,21 +13,115 @@ class PluginYichatModel extends CommonModel{
 	public function __construct() {
 		
     } 
-	//自定义方法
-	public function reply($openid,$content,$yxObj,$config){
-        //根据content,查询关键字表,调用相应方法进行回复
-        $lists = M('PluginYichatAutoreply')->where(array('status'=>1))->select();
-        foreach($lists as $val){
-        	if(preg_match($val['rule'],$content, $matchs)){
-        		$this->$val['function']($openid,$yxObj,$config,$matchs);
-        		exit();
-        	}
-        }
-        unset($val);
-        $this->Chat($yxObj,$content);//开通chat回复后，会自动设置无法回答上来的答案
+	//回复方法
+	/*@用户id @回复关键词 @yx @配置*/
+	public function reply($openid,$key,$yxObj,$config){
+		/*$key = $content;//客户的回复
+		$keyArr = array ();//保存的信息数组。
+		$user_status = S ( 'user_status_' . $openid );//保存用户当前状态。array()
+		$accept = $user_status ['keyArr'] ['accept'];//只认指定类型的可以增加此参数。
+		if (($accept ['type'] == 'regex' && ! preg_match ( $accept ['data'], $key )) || ($accept ['type'] == 'array' && ! in_array ( $key, $accept ['data'] ))) {
+			$user_status = false;
+			S ( 'user_status_' . $openid, null ); // 可设置规定只能接收某些值，如果用户输入的内容不是规定的值，则放弃当前状态,支持正则和数组两种规定方式
+		}
+		if (! isset (  $func[$key] ) && $user_status) {
+			 $func[$key] = $user_status ['addon'];
+			$keyArr = $user_status ['keyArr'];
+			S ( 'user_status_' . $openid, null );
+		}
+		*/
+		//全词匹配 优先级最高
+		if (! isset ( $func[$key] )) {
+			$like ['key'] = $key;
+			$like ['key_type'] = 0;//0是全词匹配 其它为包含匹配
+			$like ['status'] = 1;//规则状态
+			$keyArr = M ( 'PluginYichatKeyword' )->where ( $like )->order ( 'id desc' )->find ();
+	
+			if (! empty ( $keyArr ['func'] )) {
+				//存在处理方法
+				$func[$key]=$keyArr ['func'];	
+				$this->request_count ( $keyArr );		
+			}
+		}	
+		// 通过模糊关键词来定位处理
+		if (! isset ( $func[$key] )) {
+			unset ( $like ['key'] );
+			$like ['key_type'] = array ('gt',0);
+			$list = M ( 'PluginYichatKeyword' )->where ( $like )->order ( 'key_len desc, id desc' )->select ();
+			
+			foreach ( $list as $keyInfo ) {
+				$this->_contain_keyword ( $keyInfo, $key, $func, $keyArr );
+			}
+		}
+		//无法匹配时使用通配符
+		if (! isset (  $func[$key] )) {
+			unset ( $like ['key_type'] );
+			$like ['key'] = '*';
+			$keywordArr = M ( 'keyword' )->where ( $like )->order ( 'id desc' )->find ();
+			
+			if (! empty ( $keyArr ['func'] )) {
+				$func[$key]=$keyArr ['func'];	
+				$this->request_count ( $keyArr );
+			}
+		}
+		if(isset($func[$key])){
+			$this->$func[$key]($yxObj,$keyArr);//根据规则调用方法
+		}else{
+			//最后执行智能聊天插件
+        	$this->Chat($yxObj,$key);//开通chat回复后，会自动设置无法回答上来的答案	
+		}    
         
        // $yxObj->text("很抱歉,'.$config['name'].'不知道你在说什么,回复'帮助'或者'bz'或者'help'查看可用指令")->reply();
     }
+/*	function mult($yxObj,$keyArr){
+		$map ['id']=$keyArr['info_id'];
+		// 多图文回复
+		$mult = M ( 'plugin_keyword_multnews' )->where ( $map )->find ();
+		$map_news ['id'] = array (
+				'in',
+				$mult ['mult_ids'] 
+		);
+		$list = M ( 'plugin_keyword_news' )->where ( $map_news )->select ();
+		
+		foreach ( $list as $k => $info ) {
+			if ($k > 8)
+				continue;
+			
+			$articles [] = array (
+					'Title' => $info ['title'],
+					'Description' => $info ['intro'],
+					'PicUrl' => get_cover_url ( $info ['cover'] ),
+					'Url' => ''
+			);
+		}
+			
+	}*/
+	//图文消息
+	function news($yxObj,$keyArr){
+		$map ['id']=$keyArr['info_id'];
+		// 单条图文回复
+		$info = M ( 'plugin_keyword_news' )->where ( $map )->find ();
+			
+		// 组装需要的图文数据，格式是固定的
+		$data [0] = array (
+				'Title' => $info ['title'],
+				'Description' => $info ['intro'],
+				'PicUrl' => $info ['img'] ,
+				'Url' => '' 
+		);
+		$yxObj->news($data)->reply();	
+	}
+	function text($yxObj,$keyArr){
+		$map ['id']=$keyArr['info_id'];
+		// 单条图文回复
+		$info = M ( 'plugin_keyword_text' )->where ( $map )->find ();
+		empty($info['content'])&&$this->msgerr($yxObj,$keyArr['key']);
+		$yxObj->text($info['content'])->reply();	
+	}
+	//未查询到信息
+	function msgerr($yxObj,$key){
+		$yxObj->text('未找到关键字：《'.$key.'》的内容')->reply();		
+	}
 	/*
 	*自动回复聊天【调用智能聊天接口插件】
 	*@param unknown $openid $yxObj $config $content
@@ -142,4 +236,48 @@ class PluginYichatModel extends CommonModel{
     	}
     }
    
+   	//处理模糊匹配或者正则匹配
+	private function _contain_keyword($keyInfo, $key, &$func, &$keyArr) {			
+		// 支持正则匹配
+		if ($keyInfo ['key_type'] == 4) {
+			if (preg_match ( $keyInfo ['key'], $key )) {
+				$func [$key] = $keyInfo ['func'];
+				$keyArr = $keyInfo;
+				$this->request_count ( $keyArr);
+			}
+			return false;
+		}
+		
+		$arr = explode ( $keyInfo ['key'], $key );
+		if (count ( $arr ) > 1) {
+			// 在关键词不相等的情况下进行左右匹配判断，否则相等的情况肯定都匹配
+			if ($keyInfo ['key'] != $key) {
+				// 左边匹配
+				if ($keyInfo ['key_type'] == 1 && ! empty ( $arr [0] ))
+					return false;
+					
+					// 右边 匹配
+				if ($keyInfo ['key_type'] == 2 && ! empty ( $arr [1] ))
+					return false;
+			}
+			
+			$func [$key] = $keyInfo ['func'];
+			
+			$keyArr = $keyInfo;
+			$keyArr ['prefix'] = trim ( $arr [0] ); // 关键词前缀，即包含关键词的前面部分
+			$keyArr ['suffix'] = trim ( $arr [1] ); // 关键词后缀，即包含关键词的后面部分
+			
+			$this->request_count ( $keyArr );
+		}
+	}
+   	//增加关键词响应次数，用来统计分析用户行为
+	private function request_count($key,$keyInfo ['key']){
+		empty($keyInfo)&& (return false);
+		$data['time']=NOW_TIME;
+		$data['replyinfo']=$key;
+		$data['requestinfo']=$keyInfo ['key'];
+		$data['requestid']=$keyInfo ['id'];
+		$data['replytype']='Yichat';
+		M ( 'PluginYichatKeywordLog')->add ($data);
+	}
 }
