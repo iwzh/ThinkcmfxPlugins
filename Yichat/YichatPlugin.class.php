@@ -24,7 +24,7 @@ class YichatPlugin extends Plugin{
     public function install(){//安装方法必须实现
 		$install_sql = './plugins/Yichat/install.sql';
 		if (file_exists ( $install_sql )) {
-			execute_sql_file ( $install_sql );
+			sp_execute_sql_file ( $install_sql );
 		}
 		return true;//安装成功返回true，失败false
 		
@@ -33,7 +33,7 @@ class YichatPlugin extends Plugin{
 	public function uninstall(){//卸载方法必须实现
 		$install_sql = './plugins/Yichat/uninstall.sql';
 		if (file_exists ( $install_sql )) {
-			execute_sql_file ( $install_sql );
+			sp_execute_sql_file ( $install_sql );
 		}
 		return true;//卸载成功返回true，失败false
 	}

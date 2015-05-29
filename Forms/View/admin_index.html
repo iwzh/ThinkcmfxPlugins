@@ -1,0 +1,59 @@
+<admintpl file="header" />
+</head>
+<body class="J_scroll_fixed">
+	<div class="wrap J_check_wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:sp_plugin_url('Forms://AdminIndex/index')}">通用表单</a></li>
+			<li><a href="{:sp_plugin_url('Forms://AdminIndex/add')}">添加表单</a></li>
+		</ul>
+		<form method="post" class="J_ajaxForm" action="{:U('Link/listorders')}">
+		
+			
+			<table class="table table-hover table-bordered table-list">
+				<thead>
+					<tr>
+						<th width="16"><label><input type="checkbox" class="J_check_all" data-direction="x" data-checklist="J_check_x"></label></th>
+						<th width="50">ID</th>
+						<th>标题</th>
+						<th>简介</th>						
+						<th>更新时间</th>
+						<th width="120">管理</th>
+						<th width="120">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<foreach name="list" item="vo">
+					<tr>
+						<td><input type="checkbox" class="J_check" data-yid="J_check_y" data-xid="J_check_x" name="ids[]" value="{$vo.link_id}"></td>						
+						<td>{$vo['id']}</td>
+						<td>{$vo.title}</td>
+						<td>{$vo.intro|msubstr=0,30}</td>
+						<td>{$vo.mTime}</td>
+						<td>
+							<a href="{:sp_plugin_url('Forms://FormsAttribute/index',array('forms_id'=>$vo['id']))}">字段管理</a> | 
+							<a href="{:sp_plugin_url('Forms://FormsValue/index',array('forms_id'=>$vo['id']))}">数据管理</a>
+						</td>
+						<td>
+							<a href="{:sp_plugin_url('Forms://AdminIndex/edit',array('id'=>$vo['id']))}">修改</a> |
+							<a href="{:sp_plugin_url('Forms://AdminIndex/del',array('id'=>$vo['id']))}" class="J_ajax_del">删除</a>
+						</td>
+					</tr>
+					</foreach>
+				</tbody>
+				<tfoot>
+					<tr>
+						<th width="16"><label><input type="checkbox" class="J_check_all" data-direction="x" data-checklist="J_check_x"></label></th>
+						<th width="50">ID</th>
+						<th>标题</th>
+						<th>简介</th>						
+						<th>更新时间</th>
+						<th>管理</th>
+						<th>操作</th>
+					</tr>
+				</tfoot>
+			</table>
+		</form>
+	</div>
+	<script src="__ROOT__/statics/js/common.js?"></script>
+</body>
+</html>
