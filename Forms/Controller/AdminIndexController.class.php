@@ -20,32 +20,22 @@ class AdminIndexController extends PluginController{
 			//TODO no login
 		}
 		$this->assign('forms_url',sp_plugin_url('Forms://AdminIndex/index'));
-		$this->model=D("plugins://Forms/PluginForms");
+		$this->forms_model=D("plugins://Forms/PluginForms");
 	}
 	
 	function index(){
-		//$plugin_demo_model=D("plugins://Demo/PluginDemo");//实例化自定义模型PluginDemo ,需要创建plugin_demo表
-		//$plugin_demo_model->test();//调用自定义模型PluginDemo里的test方法
-		
-		/*$users_model=D("Users");//实例化Common模块下的Users模型
-		//$users_model=D("Common/Users");//也可以这样实例化Common模块下的Users模型
-		$users=$users_model->limit(0,5)->select();
-		
-		
-		
-		$this->assign("users",$users);
-		
-		$this->display(":admin_index");*/
-		$list=$this->model->select();
+		$list=$this->forms_model->select();
 		$this->assign('list',$list);		
 		$this->display(":admin_index");
 	}
 	//新建表单
 	public function add(){
 		if(IS_POST){
-			if ($this->model->create()) {
-				if ($this->model->add()!==false) {
-					$this->success("添加成功！", sp_plugin_url('Forms://AdminIndex/index'));
+			if ($this->forms_model->create()) {
+				$content=htmlspecialchars_decode(I('post.content','','trim'));
+				$this->forms_model->content->$content;
+				if ($this->forms_model->add()!==false) {
+					$this->success("添加成功！");
 				} else {
 					$this->error("添加失败！");
 				}
@@ -58,24 +48,26 @@ class AdminIndexController extends PluginController{
 		}	
 		
 	}
+	
 	//修改表单
 	public function edit(){
 		if (IS_POST) {
-			dump($_POST);exit;
 			$password=I('post.password','','trim');
+			if(empty($password))
+				unset($_POST['password']);
 			
-			if ($this->model->create()) {
-				if ($this->model->save()!==false) {
+			if ($this->forms_model->create($_POST)) {		
+				if ($this->forms_model->save()!==false) {
 					$this->success("保存成功！");
-				} else {
+				} else {					
 					$this->error("保存失败！");
 				}
 			} else {
-				$this->error($this->model->getError());
+				$this->error($this->forms_model->getError());
 			}
-		}else{
+		}else{			
 			$id=I("get.id");
-			$form=$this->model->where("id=$id")->find();
+			$form=$this->forms_model->where("id=$id")->find();
 			$this->assign($form);
 			$this->display(":admin_edit");			
 		}
@@ -83,7 +75,7 @@ class AdminIndexController extends PluginController{
 	//删除表单
 	public function del(){
 		$id = intval(I("get.id"));//删除表单会同时删除用户提交的和表单的字段		
-		if ($this->model->delete($id)!==false) {
+		if ($this->forms_model->delete($id)!==false) {
 			D("plugins://Forms/PluginFormsAttribute")->where(array("forms_id=$id"))->delete();//删除字段
 			D("plugins://Forms/PluginFormsValue")->where(array("forms_id=$id"))->delete();//删除提交信息
 			$this->success("删除成功！");

@@ -7,91 +7,103 @@
 </style>
 </head>
 <body class="J_scroll_fixed">
-<div class="wrap J_check_wrap">
+	<div class="wrap J_check_wrap">
 		<ul class="nav nav-tabs">
 			<li><a href="{:sp_plugin_url('Forms://AdminIndex/index')}">通用表单</a></li>
-			<li><a href="{:sp_plugin_url('Forms://AdminIndex/add')}">添加表单</a></li>
-			<li class="active"><a href="{:sp_plugin_url('Forms://AdminIndex/edit',array('id'=>$id))}">修改-[ {$title} ]</a></li>
+			<li><a href="{:sp_plugin_url('Forms://FormsAttribute/index',array('forms_id'=>$forms_data['id']))}">管理[ {$forms_data.title|msubstr=0,10} ]的属性</a></li>
+			<li class="active" ><a href="{:sp_plugin_url('Forms://FormsAttribute/edit',array('id'=>$id,'forms_id'=>$forms_data['id']))}">编辑属性-{$title} </a></li>			
 		</ul>
+		<div class="well">
+			<span>字段类型为单选复选下拉时需要填写此项，格式为每行一个选项，中间英文:分割key和val如：<br />
+								0:男<br />
+								1:女<br />
+								2:保密</span>
+		</div>
 		<div class="common-form">
-  <form name="myform" id="myform" action="{:sp_plugin_url('Forms://AdminIndex/edit',array('id'=>$id))}" method="post" class="form-horizontal J_ajaxForms" enctype="multipart/form-data">
-		<input type="hidden" name="id" value="{$id}">	 
-			 <div class="col-auto">
+  <form name="myform" id="myform" action="{:sp_plugin_url('Forms://FormsAttribute/edit',array('id'=>$id,'forms_id'=>$forms_data['id']))}" method="post" class="form-horizontal J_ajaxForms" enctype="multipart/form-data">
+	<input type="hidden" name="forms_id" value="{$forms_data['id']}">
+	<input type="hidden" name="id" value="{$id}">
+	<div class="col-auto">
     <div class="table_full">
       <table class="table table-bordered">
-            
+            <tr>
+              <th width="80">字段名称 </th>
+              <td>
+              	<input type="text" style="width:400px;" name="name" id="name"  required value="{$name}" style="color:" class="input input_hd J_title_color" placeholder="请输入名称" onkeyup="strlen_verify(this, 'title_len', 30)" />
+              	<span class="must_red">*仅支持英文字母开头，长度不超过30</span>
+              </td>
+            </tr>
             <tr>
               <th width="80">标题 </th>
               <td>
               	<input type="text" style="width:400px;" name="title" id="title"  required value="{$title}" style="color:" class="input input_hd J_title_color" placeholder="请输入标题" onkeyup="strlen_verify(this, 'title_len', 160)" />
-              	<span class="must_red">*</span>
+              	<span class="must_red">*表单显示用</span>
               </td>
             </tr>
             <tr>
-              <th width="80">表单密码</th>
-              <td><input type='text' name='password' id='password' value='' style='width:400px'   class='input' placeholder='请输入表单密码'></td>
+              <th width="80">字段类型</th>
+              <td>
+              		<select name="type">
+						<option value="0" <eq name='type' value='0'> selected </eq>>单行文本</option>
+						<option value="1" <eq name='type' value='1'> selected </eq>>多行文本</option>
+						<option value="2" <eq name='type' value='2'> selected </eq>>单选框</option>
+						<option value="3" <eq name='type' value='3'> selected </eq>>多选框</option>
+						<option value="4" <eq name='type' value='4'> selected </eq>>下拉框</option>								
+					</select>
+					<span class="must_red">单选框，复选框，下拉框需要填写下面的参数值其它均不需要</span>
+              </td>
             </tr>
             <tr>
-              <th width="80">简介 </th>
-              <td><textarea name='intro' id='intro'  style='width:98%;height:50px;' placeholder='请填写简介'>{$intro}</textarea><span class="must_red">*</span></td>
+              <th width="80">附加参数 </th>
+              <td><textarea name='intro' id='intro'  style='width:98%;height:50px;' placeholder='请填写参数'>{$intro}</textarea>
+              		<span class="must_red">格式为每行一个选项，中间英文:分割key和val</span></td>
             </tr>
-			<tr>
-	          <th><b>缩略图</b></th>
-
+            <tr>
+              <th width="80">默认值 </th>
+              <td>
+             	<input type="text" class="input" name="value" value="{$value}">
+				<span class="must_red">字段的默认值</span>
+              </td>
+            </tr>
+            <tr>
+              <th width="80">字段备注 </th>
+              <td>
+              	<input type="text" class="input" name="remark" value="{$remark}">
+				<span class="must_red">用于表单中的提示</span>
+              </td>
+            </tr>
+            <tr>
+	          <th><b>是否必填</b></th>	        
 	          <td>
-	            	<input type='hidden' name='cover_img' id='cover_img' value=''>
-					<a href='javascript:void(0);' onclick="flashupload('thumb_images', '附件上传','cover_img',thumb_images,'1,jpg|jpeg|gif|png|bmp,1,,,1','','','');return false;">
-					<if condition="empty($cover_img)">
-						<img src='__ROOT__/statics/images/icon/upload-pic.png' id='thumb_preview' width='135' height='113' style='cursor:hand' /></a>
-        			<else/>
-						<img src="{:$cover_img}" id='thumb_preview' width='135' height='113' style='cursor:hand;height:113px;' />
-					</if>
-					<input type="button"  class="btn" onclick="$('#thumb_preview').attr('src','__ROOT__/statics/images/icon/upload-pic.png');$('#thumb').val('');return false;" value="取消图片">
-				
-				</td>
-	        </tr>
-            <tr>
-              <th width="80">详情</th>
-              <td><div id='content_tip'></div>             
-              	<script type="text/plain" id="content" name="content">{$content}</script>
-                <script type="text/javascript">
-                //编辑器路径定义
-                var editorURL = GV.DIMAUB;
-                </script>
-                <script type="text/javascript"  src="__ROOT__/statics/js/ueditor/ueditor.config.js"></script>
-                <script type="text/javascript"  src="__ROOT__/statics/js/ueditor/ueditor.all.min.js"></script>
-				</td>
-            </tr>
-            <tr>
-	          <th><b>是否允许编辑</b></th>
-	        
-	          <td>
-	          	<span class="switch_list cc">
-				<label class="radio"><input type="radio" name="can_edit" value="1" <if condition="$can_edit eq 1"> checked </if> ><span>可以</span></label>
-				<label class="radio"><input type="radio" name="can_edit" value="0" <if condition="$can_edit neq 1"> checked </if> ><span>不可以</span></label>
-			 	</span>
-			 	<span class="must_red">用户提交后，是否可再次编辑</span>
+				<select name="is_must">
+					<option value="0" <neq name='is_must' value='1'> selected </neq>>否</option>
+					<option value="1" <eq name='is_must' value='1'> selected </eq>>是</option>
+				</select>
+				<span class="must_red">该选项是否必填</span>
 			 </td>
 	        </tr>
 			<tr>
-              <th width="80">提交后跳转地址 </th>
+              <th width="80">正则验证 </th>
               <td>
-              	<input type="text" style="width:400px;" name="jump_url" id="jump_url"  value="{$jump_url}" style="color:" class="input input_hd J_title_color" placeholder="跳转地址" />
-              	<span class="must_red">为空不跳转</span>
+              	<input type="text" class="input" name="validate_rule" value="{$validate_rule}">
+				<span class="must_red">为空将不进行正则验证</span>
               </td>
             </tr>
 			<tr>
-              <th width="80">提交后提示内容 </th>
-              <td><textarea name='finish_tip' id='finish_tip' style='width:98%;height:50px;' placeholder='请填写提示内容'>{$finish_tip}</textarea><span class="must_red">*</span></td>
+              <th width="80">出错提示 </th>
+              <td>
+              	<input type="text" class="input" name="error_info" value="{$error_info}" >
+				<span class="must_red">验证不通过时提示</span>
+              </td>
             </tr>
 			 <tr>
-	          <th><b>提交限制</b></th>
-	       
+	          <th>是否显示</th>	       
 	          <td>
-	          	<span class="switch_list cc">
-				<label class="radio"><input type="radio" name="isuser" value="1" <if condition="$isuser neq 0"> checked </if> ><span>登录用户</span></label>
-				<label class="radio"><input type="radio" name="isuser" value="0" <if condition="$isuser eq 0"> checked </if>   ><span>无限制</span></label>
-			 	</span>
+	          	<select name="status">
+	          		<option value="1" <neq name='status' value='0'> selected </neq> >显示</option>
+					<option value="0" <eq name='status' value='0'> selected </eq> >隐藏</option>
+	          	</select>
+				<span class="must_red">字段是否在表单中显示！</span>
 			 </td>
 	        </tr>            
                         
@@ -131,17 +143,7 @@ $(function () {
 	});
 	/////---------------------
 	 Wind.use('validate', 'ajaxForm', 'artDialog', function () {
-			//javascript
-	        
-	            //编辑器
-	            editorcontent = new baidu.editor.ui.Editor();
-	            editorcontent.render( 'content' );
-	            try{editorcontent.sync();}catch(err){};
-	            //增加编辑器验证规则
-	            jQuery.validator.addMethod('editorcontent',function(){
-	                try{editorcontent.sync();}catch(err){};
-	                return editorcontent.hasContents();
-	            });
+			
 	            var form = $('form.J_ajaxForms');
 	        //ie处理placeholder提交问题
 	        if ($.browser.msie) {
@@ -183,9 +185,9 @@ $(function () {
 					}
 	            },
 	            //验证规则
-	            rules: {'title':{required:1},'content':{editorcontent:true}},
+	            rules: {'title':{required:1},'name':{required:1}},
 	            //验证未通过提示消息
-	            messages: {'title':{required:'请输入标题'},'content':{editorcontent:'内容不能为空'}},
+	            messages: {'title':{required:'请输入标题'},'name':'名称不能为空'},
 	            //给未通过验证的元素加效果,闪烁等
 	            highlight: false,
 	            //是否在获取焦点时验证
@@ -222,7 +224,7 @@ $(function () {
 											},{
     											name: '返回列表页',
 												callback:function(){
-													location='{:sp_plugin_url('Forms://AdminIndex/index')}';
+													location='{$forms_url}';
 													return true;
 												}
 											}

@@ -1,0 +1,328 @@
+<admintpl file="header"/>
+<style type="text/css">
+.col-auto { overflow: auto; _zoom: 1;_float: left;}
+.col-right { float: right; width: 210px; overflow: hidden; margin-left: 6px; }
+.table th, .table td {vertical-align: middle;}
+.picList li{margin-bottom: 5px;}
+</style>
+</head>
+<body class="J_scroll_fixed">
+	<div class="wrap J_check_wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:sp_plugin_url('Forms://AdminIndex/index')}">通用表单</a></li>
+			<li><a href="{:sp_plugin_url('Forms://FormsAttribute/index',array('forms_id'=>$forms_data['id']))}">管理[ {$forms_data.title|msubstr=0,10} ]的属性</a></li>
+			<li class="active" ><a href="{:sp_plugin_url('Forms://FormsAttribute/add',array('forms_id'=>$forms_data['id']))}">添加[ {$forms_data.title|msubstr=0,10} ]的属性</a></li>
+		</ul>
+		<div class="well">
+			<span>字段类型为单选复选下拉时需要填写此项，格式为每行一个选项，中间英文:分割key和val如：<br />
+								0:男<br />
+								1:女<br />
+								2:保密</span>
+		</div>
+		<div class="common-form">
+  <form name="myform" id="myform" action="{:sp_plugin_url('Forms://FormsAttribute/edit',array('forms_id'=>$forms_data['id']))}" method="post" class="form-horizontal J_ajaxForms" enctype="multipart/form-data">
+				<input type="hidden" name="forms_id" value="{$forms_data['id']}">	
+				<fieldset>
+					<div class="control-group">
+						<label class="control-label">字段名称:</label>
+						<div class="controls">
+							<input type="text" class="input" required name="name" value="">
+							<span class="must_red">*仅支持英文字母开头，长度不超过30</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">字段标题:</label>
+						<div class="controls">
+							<input type="text" class="input" required name="title" value="">
+							<span class="must_red">表单显示用</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">字段类型:</label>
+						<div class="controls">
+							<select name="type">
+								<option value="0">单行文本</option>
+								<option value="1">多行文本</option>
+								<option value="2">单选框</option>
+								<option value="3">多选框</option>
+								<option value="4">下拉框</option>								
+							</select>
+							<span class="must_red">单选框，复选框，下拉框需要填写下面的参数值其它均不需要</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">附加参数:</label>
+						<div class="controls">
+							<textarea name="intro" rows="5" cols="57"></textarea>
+							<span class="must_red">格式为每行一个选项，中间英文:分割key和val</span>
+						</div>
+					</div>
+					
+					<div class="control-group">
+						<label class="control-label">默认值:</label>
+						<div class="controls">
+							<input type="text" class="input" name="value" value="">
+							<span class="must_red">字段的默认值</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">字段备注:</label>
+						<div class="controls">
+							<input type="text" class="input" name="remark" value="">
+							<span class="must_red">用于表单中的提示</span>
+						</div>
+					</div>
+					
+					<div class="control-group">
+						<label class="control-label">是否必填:</label>
+						<div class="controls">
+							<select name="is_must">
+								<option value="0">否</option>
+								<option value="1">是</option>
+							</select>
+							<span class="must_red">该选项是否必填</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">正则验证:</label>
+						<div class="controls">
+							<input type="text" class="input" name="validate_rule" value="">
+							<span class="must_red">为空将不进行正则验证</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">出错提示:</label>
+						<div class="controls">
+							<input type="text" class="input" name="error_info" value="" >
+							<span class="must_red">验证不通过时提示</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">是否显示:</label>
+						<div class="controls">
+							<select name="status"><option value="1">显示</option>
+								<option value="0">隐藏</option></select>
+							<span class="must_red">字段是否在表单中显示！</span>
+						</div>
+					</div>
+				</fieldset>
+<div class="col-auto">
+    <div class="table_full">
+      <table class="table table-bordered">
+            <tr>
+              <th width="80">字段名称 </th>
+              <td>
+              	<input type="text" style="width:400px;" name="name" id="name"  required value="{$name}" style="color:" class="input input_hd J_title_color" placeholder="请输入名称" onkeyup="strlen_verify(this, 'title_len', 30)" />
+              	<span class="must_red">*仅支持英文字母开头，长度不超过30</span>
+              </td>
+            </tr>
+            <tr>
+              <th width="80">标题 </th>
+              <td>
+              	<input type="text" style="width:400px;" name="title" id="title"  required value="{$title}" style="color:" class="input input_hd J_title_color" placeholder="请输入标题" onkeyup="strlen_verify(this, 'title_len', 160)" />
+              	<span class="must_red">*表单显示用</span>
+              </td>
+            </tr>
+            <tr>
+              <th width="80">字段类型</th>
+              <td>
+              		<select name="type">
+						<option value="0" <eq name='type' value='0'> selected </eq>>单行文本</option>
+						<option value="1" <eq name='type' value='1'> selected </eq>>多行文本</option>
+						<option value="2" <eq name='type' value='2'> selected </eq>>单选框</option>
+						<option value="3" <eq name='type' value='3'> selected </eq>>多选框</option>
+						<option value="4" <eq name='type' value='4'> selected </eq>>下拉框</option>								
+					</select>
+					<span class="must_red">单选框，复选框，下拉框需要填写下面的参数值其它均不需要</span>
+              </td>
+            </tr>
+            <tr>
+              <th width="80">附加参数 </th>
+              <td><textarea name='intro' id='intro'  style='width:98%;height:50px;' placeholder='请填写参数'>{$intro}</textarea>
+              		<span class="must_red">格式为每行一个选项，中间英文:分割key和val</span></td>
+            </tr>
+            <tr>
+              <th width="80">默认值 </th>
+              <td>
+             	<input type="text" class="input" name="value" value="{$value}">
+				<span class="must_red">字段的默认值</span>
+              </td>
+            </tr>
+            <tr>
+              <th width="80">字段备注 </th>
+              <td>
+              	<input type="text" class="input" name="remark" value="{$remark}">
+				<span class="must_red">用于表单中的提示</span>
+              </td>
+            </tr>
+            <tr>
+	          <th><b>是否必填</b></th>	        
+	          <td>
+				<select name="is_must">
+					<option value="0" <neq name='is_must' value='1'> selected </neq>>否</option>
+					<option value="1" <eq name='is_must' value='1'> selected </eq>>是</option>
+				</select>
+				<span class="must_red">该选项是否必填</span>
+			 </td>
+	        </tr>
+			<tr>
+              <th width="80">正则验证 </th>
+              <td>
+              	<input type="text" class="input" name="validate_rule" value="{$validate_rule}">
+				<span class="must_red">为空将不进行正则验证</span>
+              </td>
+            </tr>
+			<tr>
+              <th width="80">出错提示 </th>
+              <td>
+              	<input type="text" class="input" name="error_info" value="{$error_info}" >
+				<span class="must_red">验证不通过时提示</span>
+              </td>
+            </tr>
+			 <tr>
+	          <th>是否显示</th>	       
+	          <td>
+	          	<select name="status">
+	          		<option value="1">显示</option>
+					<option value="0">隐藏</option>
+	          	</select>
+				<span class="must_red">字段是否在表单中显示！</span>
+			 </td>
+	        </tr>            
+                        
+        </tbody>
+      </table>
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary btn_submit J_ajax_submit_btn">添加</button>
+					<a class="btn" href="{$forms_url}">返回</a>
+				</div>
+			</form>
+		</div>
+	</div>
+	<script type="text/javascript" src="__ROOT__/statics/js/common.js"></script>
+	<script type="text/javascript" src="__ROOT__/statics/js/content_addtop.js"></script>
+	<script type="text/javascript">
+$(function () {
+	//setInterval(function(){public_lock_renewal();}, 10000);
+	$(".J_ajax_close_btn").on('click', function (e) {
+	    e.preventDefault();
+	    Wind.use("artDialog", function () {
+	        art.dialog({
+	            id: "question",
+	            icon: "question",
+	            fixed: true,
+	            lock: true,
+	            background: "#CCCCCC",
+	            opacity: 0,
+	            content: "您确定需要关闭当前页面嘛？",
+	            ok:function(){
+					setCookie("refersh_time",1);
+					window.close();
+					return true;
+				}
+	        });
+	    });
+	});
+	/////---------------------
+	 Wind.use('validate', 'ajaxForm', 'artDialog', function () {
+			
+	            var form = $('form.J_ajaxForms');
+	        //ie处理placeholder提交问题
+	        if ($.browser.msie) {
+	            form.find('[placeholder]').each(function () {
+	                var input = $(this);
+	                if (input.val() == input.attr('placeholder')) {
+	                    input.val('');
+	                }
+	            });
+	        }
+	        //表单验证开始
+	        form.validate({
+				//是否在获取焦点时验证
+				onfocusout:false,
+				//是否在敲击键盘时验证
+				onkeyup:false,
+				//当鼠标掉级时验证
+				onclick: false,
+	            //验证错误
+	            showErrors: function (errorMap, errorArr) {
+					//errorMap {'name':'错误信息'}
+					//errorArr [{'message':'错误信息',element:({})}]
+					try{
+						$(errorArr[0].element).focus();
+						art.dialog({
+							id:'error',
+							icon: 'error',
+							lock: true,
+							fixed: true,
+							background:"#CCCCCC",
+							opacity:0,
+							content: errorArr[0].message,
+							cancelVal: '确定',
+							cancel: function(){
+								$(errorArr[0].element).focus();
+							}
+						});
+					}catch(err){
+					}
+	            },
+	            //验证规则
+	            rules: {'title':{required:1},'name':{required:1}},
+	            //验证未通过提示消息
+	            messages: {'title':{required:'请输入标题'},'name':'名称不能为空'},
+	            //给未通过验证的元素加效果,闪烁等
+	            highlight: false,
+	            //是否在获取焦点时验证
+	            onfocusout: false,
+	            //验证通过，提交表单
+	            submitHandler: function (forms) {
+	                $(forms).ajaxSubmit({
+	                    url: form.attr('action'), //按钮上是否自定义提交地址(多按钮情况)
+	                    dataType: 'json',
+	                    beforeSubmit: function (arr, $form, options) {
+	                        
+	                    },
+	                    success: function (data, statusText, xhr, $form) {
+	                        if(data.status){
+								setCookie("refersh_time",1);
+								//添加成功
+								Wind.use("artDialog", function () {
+								    art.dialog({
+								        id: "succeed",
+								        icon: "succeed",
+								        fixed: true,
+								        lock: true,
+								        background: "#CCCCCC",
+								        opacity: 0,
+								        content: data.info,
+										button:[
+											{
+												name: '继续添加？',
+												callback:function(){
+													//reloadPage(window);
+													return true;
+												},
+												focus: true
+											},{
+    											name: '返回列表页',
+												callback:function(){
+													location='{$forms_url}';
+													return true;
+												}
+											}
+										]
+								    });
+								});
+							}else{
+								isalert(data.info);
+							}
+	                    }
+	                });
+	            }
+	        });
+	    });
+	////-------------------------
+});
+</script>
+</body>
+</html>

@@ -3,10 +3,10 @@
 <body class="J_scroll_fixed">
 	<div class="wrap J_check_wrap">
 		<ul class="nav nav-tabs">
-			<li class="active"><a href="{:sp_plugin_url('Forms://AdminIndex/index')}">通用表单</a></li>
-			<li><a href="{:sp_plugin_url('Forms://AdminIndex/add')}">添加表单</a></li>
+			<li><a href="{:sp_plugin_url('Forms://AdminIndex/index')}">通用表单</a></li>
+			<li class="active"><a href="{:sp_plugin_url('Forms://FormsAttribute/index',array('forms_id'=>$forms_data['id']))}">管理[ {$forms_data.title|msubstr=0,15} ]的数据</a></li>
 		</ul>
-		<form method="post" class="J_ajaxForm" action="{:U('Link/listorders')}">
+		<form method="post" class="J_ajaxForm" action="#">
 		
 			
 			<table class="table table-hover table-bordered table-list">
@@ -15,11 +15,14 @@
 						<th width="16"><label><input type="checkbox" class="J_check_all" data-direction="x" data-checklist="J_check_x"></label></th>
 						<th width="50">ID</th>
 						<th>标题</th>
-						<th>简介</th>						
+						<th>字段名</th>
+						<th>类型</th>
+						<th>是否必填</th>
+						<th>是否显示</th>
 						<th>更新时间</th>
-						<th width="120">管理</th>
 						<th width="120">操作</th>
 					</tr>
+					<php>$type=array('单行文本','多行文本','单选','多选','下拉','时间');$is_must=array('否','是');$show=array('隐藏','显示');</php>
 				</thead>
 				<tbody>
 					<foreach name="list" item="vo">
@@ -27,15 +30,15 @@
 						<td><input type="checkbox" class="J_check" data-yid="J_check_y" data-xid="J_check_x" name="ids[]" value="{$vo.link_id}"></td>						
 						<td>{$vo['id']}</td>
 						<td>{$vo.title}</td>
-						<td>{$vo.intro|msubstr=0,60}</td>
-						<td>{$vo.mtime|date='Y-m-d',###}</td>
+						<td>{$vo.name}</td>
+						<td>{$type[$vo['type']]}</td>
+						<td>{$is_must[$vo['is_must']]}</td>
+						<td>{$show[$vo['is_show']]}</td>
+						<td>{$vo.mTime}</td>
+						
 						<td>
-							<a href="{:sp_plugin_url('Forms://FormsAttribute/index',array('forms_id'=>$vo['id']))}">字段管理</a> | 
-							<a href="{:sp_plugin_url('Forms://FormsValue/index',array('forms_id'=>$vo['id']))}">数据管理</a>
-						</td>
-						<td>
-							<a href="{:sp_plugin_url('Forms://AdminIndex/edit',array('id'=>$vo['id']))}">修改</a> |
-							<a href="{:sp_plugin_url('Forms://AdminIndex/del',array('id'=>$vo['id']))}" class="J_ajax_del">删除</a>
+							<a href="{:sp_plugin_url('Forms://FormsAttribute/edit',array('id'=>$vo['id'],'forms_id'=>$forms_data['id']))}">修改</a> |
+							<a href="{:sp_plugin_url('Forms://FormsAttribute/del',array('id'=>$vo['id'],'forms_id'=>$forms_data['id']))}">删除</a>
 						</td>
 					</tr>
 					</foreach>
@@ -45,9 +48,11 @@
 						<th width="16"><label><input type="checkbox" class="J_check_all" data-direction="x" data-checklist="J_check_x"></label></th>
 						<th width="50">ID</th>
 						<th>标题</th>
-						<th>简介</th>						
+						<th>字段名</th>
+						<th>类型</th>
+						<th>是否必填</th>
+						<th>是否显示</th>
 						<th>更新时间</th>
-						<th>管理</th>
 						<th>操作</th>
 					</tr>
 				</tfoot>
