@@ -13,13 +13,13 @@
 				<thead>
 					<tr>
 						<th width="16"><label><input type="checkbox" class="J_check_all" data-direction="x" data-checklist="J_check_x"></label></th>
-						<th width="50">ID</th>
-						<th>标题</th>
-						<th>字段名</th>
-						<th>类型</th>
-						<th>是否必填</th>
-						<th>是否显示</th>
-						<th>更新时间</th>
+						<th width="50">UID</th>
+						<th>姓名</th>
+						<th>增加时间</th>
+						<volist name="listTitle" id="vo">
+							<th>{$vo.title}</th>
+						</volist>
+						
 						<th width="120">操作</th>
 					</tr>
 					<php>$type=array('单行文本','多行文本','单选','多选','下拉','时间');$is_must=array('否','是');$show=array('隐藏','显示');</php>
@@ -28,16 +28,13 @@
 					<foreach name="list" item="vo">
 					<tr>
 						<td><input type="checkbox" class="J_check" data-yid="J_check_y" data-xid="J_check_x" name="ids[]" value="{$vo.link_id}"></td>						
-						<td>{$vo['id']}</td>
-						<td>{$vo.title}</td>
-						<td>{$vo.name}</td>
-						<td>{$type[$vo['type']]}</td>
-						<td>{$is_must[$vo['is_must']]}</td>
-						<td>{$show[$vo['is_show']]}</td>
-						<td>{$vo.mTime}</td>
-						
+						<td>{$vo['uid']|default="默认"}</td>											
+						<td>{$vo.ctime}</td>	
+						<volist name="list" id="v">
+							<th>{$v.title}</th>
+						</volist>
 						<td>
-							<a href="{:sp_plugin_url('Forms://FormsAttribute/edit',array('id'=>$vo['id'],'forms_id'=>$forms_data['id']))}">修改</a> |
+							<!--<a href="{:sp_plugin_url('Forms://FormsAttribute/edit',array('id'=>$vo['id'],'forms_id'=>$forms_data['id']))}">修改</a> |-->
 							<a href="{:sp_plugin_url('Forms://FormsAttribute/del',array('id'=>$vo['id'],'forms_id'=>$forms_data['id']))}">删除</a>
 						</td>
 					</tr>
@@ -47,12 +44,11 @@
 					<tr>
 						<th width="16"><label><input type="checkbox" class="J_check_all" data-direction="x" data-checklist="J_check_x"></label></th>
 						<th width="50">ID</th>
-						<th>标题</th>
-						<th>字段名</th>
-						<th>类型</th>
-						<th>是否必填</th>
-						<th>是否显示</th>
+						<th>姓名</th>
 						<th>更新时间</th>
+						<volist name="listTitle" id="vo">
+							<th>{$vo.title}</th>
+						</volist>
 						<th>操作</th>
 					</tr>
 				</tfoot>

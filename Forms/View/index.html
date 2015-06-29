@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="ThinkCMF插件演示首页">
-  <meta name="keywords" content="ThinkCMF插件演示首页">
   <meta name="viewport"  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>ThinkCMF插件演示首页</title>
+  <meta name="description" content="我爱玉米糖-万能表单插件">
+  <meta name="keywords" content="我爱玉米糖 万能表单插件">
+  <title>{$form.title}</title>
 
   <!-- Set render engine for 360 browser -->
   <meta name="renderer" content="webkit">
@@ -20,32 +20,96 @@
   <!--
   <link rel="canonical" href="http://www.example.com/">
   -->
-
+  <link rel="stylesheet" type="text/css" href="style/bootstrap-3.3.5-dist/css/bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="style/bootstrap-3.3.5-dist/css/bootstrap-theme.min.css"/>
+	
+	
+	 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
 </head>
 <body>
-<div class="well well-warning" style="display: inline-block;">
-	<h2>ThinkCMF插件演示</h2>
-
-	<p>
-		<b>插件根目录:</b>__PLUGINROOT__
-	</p>
-
-	<p>
-		<b>插件模板根目录:</b>__PLUGINTMPL__
-	</p>
 	
-	<p>
-		<b>foreach:</b>
-	</p>
-	<ol>
-	<foreach name="users" item="vo">
-	<li>{$vo.user_login} {$vo.create_time}</li>
-	
-	</foreach>
-	</ol>
-	
+	<div class="container">
+		<form>
+		<volist name="attr" id="vo">
+			<switch name="$vo.type">
+				<case value="email">
+					<div class="form-group">
+					    <label for="example-{vo.name}">{$vo.title}</label>
+					    <input type="email" class="form-control" id="example-{vo.name}" name="{$vo.name}" value="{$vo.value}" placeholder="{$vo.remark}">
+					    <p class="help-block">{$vo.remark}</p>
+					</div>
+				</case>
+				<case value="textarea">
+					<div class="form-group">
+						<label for="example-{vo.name}">{$vo.title}</label>
+						<textarea id="example-{vo.name}" name="{$vo.name}">{$vo.value}</textarea>
+						<p class="help-block">{$vo.remark}</p>
+					</div>					
+				</case>
+				<case value="checkbox">
+					<div class="form-group">{$vo.title}
+					
+					    <p class="help-block">{$vo.remark}</p>
+					</div>
+				</case>
+				<case value="redio">
+					<div class="form-group">{$vo.title}
+					
+					    <p class="help-block">{$vo.remark}</p>
+					</div>
+				</case>
+				<case value="select">
+					<div class="form-group">{$vo.title}
+					 <select name="{$vo.name}">
+                            <volist name=":parse_field_attr($vo['extra'])" id="v"> <option value="{$key}" 
+                              <eq name="vo['name']" value="$key">selected</eq>
+                              >{$v}
+                              </option>
+                            </volist>
+                          </select>
+					    <p class="help-block">{$vo.remark}</p>
+					  </div>
+				</case>
+				<default/>
+				<div class="form-group">
+				    <label for="example-{vo.name}">{$vo.title}</label>
+				    <input type="email" class="form-control" id="example-{vo.name}" name="{$vo.name}" placeholder="{$vo.remark}">
+				    <p class="help-block">{$vo.remark}</p>
+				</div>
+			</switch>
+		</volist>
+		  
+		  <div class="form-group">
+		    <label for="exampleInputPassword1">Password</label>
+		    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+		  </div>
+		  <div class="form-group">
+		    <label for="exampleInputFile">File input</label>
+		    <input type="file" id="exampleInputFile">
+		    <p class="help-block">Example block-level help text here.</p>
+		  </div>
+		  <div class="checkbox">
+		    <label>
+		      <input type="checkbox"> Check me out
+		    </label>
+		  </div>
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+    
 
-
-</div>
+    </div>
+	
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+	<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+	
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<!--<script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>-->
+	<script src="style/bootstrap-3.3.5-dist/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>

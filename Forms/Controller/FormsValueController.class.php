@@ -29,32 +29,40 @@ class FormsValueController extends PluginController{
 	//表单数据，一般为用户提交数据
 	function index(){
 		$forms_id = I("get.forms_id",0,'intval');
-		$list=$this->model->where(array('forms_id'=>$forms_id))->select();
-		$this->assign('list',$list);		
+		$listTitle=$this->Attribute_model->where(array('forms_id'=>$forms_id,'is_show'=>1))->select();
+		$this->assign('listTitle',$listTitle);
+		$list=$this->model->where(array('forms_id'=>$forms_id))->select();			
+		foreach ( $list as &$vo ) {
+			$value = unserialize ( $vo ['value'] );
+			foreach ( $value as $n => &$d ) {
+				$type = $attr [$n] ['type'];
+				$extra = $attr [$n] ['extra'];
+				switch($type){
+					case 2:
+					case 4:
+						if (isset ( $extra [$d] )) {
+							$d = $extra [$d];
+						}
+						break;
+					case 3:
+						foreach ( $d as &$v ) {
+							if (isset ( $extra [$v] )) {
+								$v = $extra [$v];
+							}
+						}
+						$d = implode ( ', ', $d );
+						break;
+				}				
+			}		
+			unset ( $vo ['value'] );
+			$vo = array_merge ( $vo, $value );
+		}		
+		$this->assign('list',$list);
 		$this->display(":admin_value");
 	}
 	
-	//修改表单
-	public function edit(){
-		if (IS_POST) {
-			
-			if ($this->model->create()) {
-				if ($this->model->save()!==false) {
-					$this->success("保存成功！");
-				} else {
-					$this->error("保存失败！");
-				}
-			} else {
-				$this->error($this->model->getError());
-			}
-		}else{
-			$id=I("get.id");
-			$form=$this->model->where("id=$id")->find();
-			$this->assign($form);
-			$this->display(":admin_edit");			
-		}
-	}
-	//删除表单
+
+	//删除用户记录
 	public function del(){
 		$id = intval(I("get.id"));//删除表单会同时删除用户提交的和表单的字段		
 		if ($this->model->delete($id)!==false) {
